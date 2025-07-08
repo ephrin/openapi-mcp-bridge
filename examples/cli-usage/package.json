@@ -1,0 +1,14 @@
+{
+  "name": "cli-usage-example",
+  "version": "1.0.0",
+  "description": "CLI usage example for openapi-mcp-server",
+  "scripts": {
+    "start": "npx openapi-mcp-bridge --definitions ./api-definitions --port 3000 --mount-path /mcp",
+    "start:debug": "npx openapi-mcp-bridge --definitions ./api-definitions --port 3000 --mount-path /mcp --debug",
+    "start:custom-port": "npx openapi-mcp-bridge --definitions ./api-definitions --port 8080",
+    "start:no-cache": "npx openapi-mcp-bridge --definitions ./api-definitions --port 3000 --no-cache"
+  },
+  "dependencies": {
+    "openapi-mcp-bridge": "^0.1.0"
+  }
+}

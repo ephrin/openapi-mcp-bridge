@@ -1,0 +1,59 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.yarn/
+
+# Build outputs
+dist/
+build/
+out/
+
+# TypeScript
+*.tsbuildinfo
+.tsbuildinfo
+
+# Environment files
+.env
+.env.local
+.env.*.local
+*.env
+
+# Logs
+*.log
+logs/
+
+# Coverage
+coverage/
+.nyc_output/
+.coverage/
+
+# IDE and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.eslintcache
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Cache directories
+.cache/
+definitions/.cache/
+
+# Test files (keeping examples)
+test-examples.js
+
+# Temporary files
+*.tmp
+*.temp

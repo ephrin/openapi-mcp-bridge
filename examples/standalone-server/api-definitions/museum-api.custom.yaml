@@ -1,0 +1,28 @@
+toolAliases:
+  "getMuseumHours": "list-museum-hours"
+  "createSpecialEvent": "create-event"
+  "listSpecialEvents": "list-events"
+  "getSpecialEvent": "get-event-details"
+  "updateSpecialEvent": "update-event"
+  "deleteSpecialEvent": "delete-event"
+  "buyMuseumTickets": "buy-tickets"
+  "getTicketCode": "get-ticket-qr"
+
+predefinedParameters:
+  global:
+    page: 1
+    limit: 10
+  endpoints:
+    "create-event":
+      category: "museum-event"
+      organizer: "museum-staff"
+    "list-museum-hours":
+      format: "json"
+    "buy-tickets":
+      source: "mcp-integration"
+
+authenticationOverrides:
+  - endpoint: "*"
+    credentials:
+      username: "${MUSEUM_USER}"
+      password: "${MUSEUM_PASS}"

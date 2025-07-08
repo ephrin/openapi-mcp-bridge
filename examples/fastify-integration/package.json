@@ -1,0 +1,17 @@
+{
+  "name": "fastify-integration-example",
+  "version": "1.0.0",
+  "description": "Fastify integration example for openapi-mcp-server",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "fastify": "^4.24.3",
+    "openapi-mcp-bridge": "^0.1.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}

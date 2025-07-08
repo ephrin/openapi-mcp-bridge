@@ -1,0 +1,55 @@
+# Source files (only ship compiled JS)
+src/
+*.ts
+!*.d.ts
+
+# Development files
+examples/
+definitions/
+server/
+openapi-mcp-architecture.md
+CLAUDE.md
+test-examples.js
+test-examples.cjs
+
+# Build files
+tsconfig.json
+.eslintrc*
+
+# Git and IDE
+.git/
+.gitignore
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs and temp files
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm/
+.yarn/
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Local env files
+.env
+.env.local
+.env.*.local
+
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
