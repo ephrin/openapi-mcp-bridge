@@ -81,10 +81,13 @@ export class SchemaConverter {
         targetSchema.required.push(...sourceSchema.required);
       }
     } else {
-      // If it's not an object, add it as a 'body' property
-      targetSchema.properties.body = sourceSchema;
-      if (required) {
-        targetSchema.required.push('body');
+      // If it's not an object, add it as a 'body' property with better schema conversion
+      const convertedSchema = this.convertOpenAPISchemaToJSONSchema(sourceSchema);
+      if (convertedSchema && Object.keys(convertedSchema).length > 0) {
+        targetSchema.properties.body = convertedSchema;
+        if (required) {
+          targetSchema.required.push('body');
+        }
       }
     }
   }

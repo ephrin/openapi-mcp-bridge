@@ -146,13 +146,28 @@ console.log('Result:', result);
 Do you want to integrate with an AI model?
 ├── Yes → Use CLI approach
 │   ├── Claude Desktop → Update claude_desktop_config.json
-│   ├── Claude Code → Create .claude-code-mcp.json
+│   ├── Claude Code → Use `claude mcp add` command
 │   └── Custom client → Use stdio connection
 └── No → Use HTTP approach
     ├── Existing Express app → Use Express middleware
     ├── New microservice → Use standalone server
     └── Testing → Use MCP Inspector
 ```
+
+### Transport Mode Decision Matrix
+
+| Transport | Use Case | Pros | Cons | Best For |
+|-----------|----------|------|------|----------|
+| **stdio** | AI model integration | Simple, secure, no network config | Single process, local only | Claude Desktop, Claude Code, development |
+| **HTTP** | Web applications | Multi-user, remote access, familiar | Network setup, security concerns | Production APIs, microservices |
+| **WebSocket** | Real-time updates | Bi-directional, low latency | Complex setup, connection management | Streaming, live data |
+
+**stdio** is the recommended transport for AI model integration because:
+- ✅ **Security**: No network exposure or authentication needed
+- ✅ **Simplicity**: Direct process communication
+- ✅ **Performance**: Lower overhead than HTTP
+- ✅ **Reliability**: No network connectivity issues
+- ✅ **Lifecycle**: Automatic process management
 
 ## Troubleshooting
 
@@ -338,6 +353,47 @@ interface Config {
 }
 ```
 
+## 🏷️ Tool Naming & Discoverability
+
+### Naming Patterns
+
+The library generates predictable tool names from OpenAPI operations:
+
+| OpenAPI Operation | Generated Tool Name | Rule |
+|-------------------|-------------------|------|
+| `GET /museum-hours` with `operationId: getMuseumHours` | `getMuseumHours` | Uses operationId when available |
+| `POST /special-events` with `operationId: createSpecialEvent` | `createSpecialEvent` | Uses operationId when available |
+| `GET /events/{eventId}` | `get-events-by-eventId` | Auto-generated: `{method}-{path}-by-{param}` |
+| `DELETE /tickets/{ticketId}` | `delete-tickets-by-ticketId` | Auto-generated: `{method}-{path}-by-{param}` |
+| `PATCH /users/{userId}/profile` | `patch-users-by-userId-profile` | Auto-generated: handles nested paths |
+
+### Custom Tool Names
+
+Override generated names using customization:
+
+```yaml
+# museum-api.custom.yaml
+toolAliases:
+  "getMuseumHours": "get-hours"
+  "createSpecialEvent": "create-event"
+  "get-events-by-eventId": "get-event-details"
+```
+
+### Tool Discovery
+
+List available tools programmatically:
+
+```bash
+# Using MCP Inspector
+mcp-inspector npx openapi-mcp-bridge --definitions ./api-definitions
+
+# In Claude Code
+"What tools are available?"
+
+# In Claude Desktop
+"List all museum API tools"
+```
+
 ## 📁 Project Structure
 
 ```
@@ -388,6 +444,7 @@ import { MCPClient } from '@modelcontextprotocol/client';
 - [Standalone Server](examples/standalone-server/)
 - [CLI Usage](examples/cli-usage/)
 - [Claude Desktop Setup](examples/claude-desktop/)
+- [Claude Code Integration](examples/claude-code/)
 - [Complete Museum API](examples/museum-api/)
 
 ## 🤝 Contributing
