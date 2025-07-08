@@ -50,7 +50,8 @@ const mainModules = [
   'cli.js',
   'integrations/express.js',
   'integrations/koa.js',
-  'integrations/fastify.js'
+  'integrations/fastify.js',
+  'integrations/standalone.js'
 ];
 
 console.log('Building CommonJS wrappers...');

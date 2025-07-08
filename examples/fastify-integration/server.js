@@ -2,6 +2,7 @@ const Fastify = require('fastify');
 const { createFastifyPlugin } = require('openapi-mcp-bridge/fastify');
 
 async function build() {
+  
   const fastify = Fastify({
     logger: {
       level: 'info',
@@ -55,22 +56,22 @@ async function build() {
     };
   });
 
-  // Optional: Add Swagger documentation
-  await fastify.register(require('@fastify/swagger'), {
-    routePrefix: '/documentation',
-    swagger: {
-      info: {
-        title: 'OpenAPI-to-MCP Fastify Example',
-        description: 'Example integration of OpenAPI-to-MCP with Fastify',
-        version: '1.0.0'
-      },
-      host: 'localhost:3000',
-      schemes: ['http'],
-      consumes: ['application/json'],
-      produces: ['application/json']
-    },
-    exposeRoute: true
-  });
+  // Optional: Add Swagger documentation (commented out - requires @fastify/swagger)
+  // await fastify.register(require('@fastify/swagger'), {
+  //   routePrefix: '/documentation',
+  //   swagger: {
+  //     info: {
+  //       title: 'OpenAPI-to-MCP Fastify Example',
+  //       description: 'Example integration of OpenAPI-to-MCP with Fastify',
+  //       version: '1.0.0'
+  //     },
+  //     host: 'localhost:3000',
+  //     schemes: ['http'],
+  //     consumes: ['application/json'],
+  //     produces: ['application/json']
+  //   },
+  //   exposeRoute: true
+  // });
 
   // Error handler
   fastify.setErrorHandler((error, request, reply) => {
