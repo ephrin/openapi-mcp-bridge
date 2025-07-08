@@ -4,47 +4,37 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A powerful Node.js/TypeScript library that automatically transforms OpenAPI definitions into MCP (Model Context Protocol) tools, enabling seamless integration between LLM clients and REST APIs.
+Transform OpenAPI definitions into MCP (Model Context Protocol) tools for seamless LLM-API integration.
 
-## 🚀 Features
+## What is MCP?
 
-- **Automatic Tool Generation**: Scan directories and convert OpenAPI definitions to MCP tools
-- **Intelligent Parameter Mapping**: Flatten path, query, and body parameters into unified MCP tool schemas
-- **Smart Proxy**: Route MCP calls to actual APIs with proper parameter reconstruction
-- **Framework Agnostic**: Works with Express, Koa, Fastify, or as standalone server
-- **Hash-based Caching**: Automatic detection of definition changes with efficient caching
-- **Authentication Support**: HTTP Basic, Bearer token, and API key authentication
-- **Contextual Parameters**: Global and per-endpoint parameter defaults
-- **Production Ready**: Comprehensive error handling, logging, TypeScript support
+**Model Context Protocol (MCP)** is a standard protocol that allows AI models to interact with external tools and data sources. Unlike REST APIs that use HTTP requests, MCP uses JSON-RPC messages over stdio or WebSocket connections.
 
-## 📦 Installation
+**Key Differences:**
+- **REST API**: HTTP requests → JSON responses
+- **MCP**: JSON-RPC messages → Tool calls and responses
+- **Purpose**: MCP bridges AI models with external systems safely and efficiently
 
+**Why OpenAPI → MCP?**
+- Your APIs are already documented in OpenAPI format
+- AI models can't directly call REST APIs
+- MCP provides a secure, standardized way to expose API functionality to AI
+
+## Quick Start (30 seconds)
+
+### 1. Install and Run
 ```bash
-npm install openapi-mcp-bridge
-# or
-yarn add openapi-mcp-bridge
-# or
-pnpm add openapi-mcp-bridge
+npm install -g openapi-mcp-bridge
+mkdir my-api && cd my-api
 ```
 
-## 🎯 Quick Start
-
-### 1. Prepare Your API Definitions
-
-Create a directory with your OpenAPI definitions:
-
-```
-api-definitions/
-├── museum-api.yaml           # Your OpenAPI definition
-└── museum-api.custom.yaml   # Optional customization
-```
-
-**museum-api.yaml** (OpenAPI definition):
-```yaml
+### 2. Create OpenAPI Definition
+```bash
+cat > museum-api.yaml << 'EOF'
 openapi: 3.1.0
 info:
   title: Museum API
-  version: 1.1.1
+  version: 1.0.0
 servers:
   - url: https://redocly.com/_mock/demo/openapi/museum-api
 paths:
@@ -53,103 +43,259 @@ paths:
       summary: Get museum hours
       operationId: getMuseumHours
       parameters:
-        - name: startDate
+        - name: date
           in: query
           schema:
             type: string
             format: date
-        - name: page
-          in: query
-          schema:
-            type: integer
-            default: 1
-  /special-events:
-    post:
-      summary: Create special events
-      operationId: createSpecialEvent
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                name:
-                  type: string
-                location:
-                  type: string
-                dates:
-                  type: array
-                  items:
-                    type: string
-                    format: date
-                price:
-                  type: number
-              required: [name, location, dates, price]
-  /special-events/{eventId}:
-    get:
-      summary: Get special event
-      operationId: getSpecialEvent
-      parameters:
-        - name: eventId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-security:
-  - BasicAuth: []
 components:
   securitySchemes:
     BasicAuth:
       type: http
       scheme: basic
+EOF
 ```
 
-**museum-api.custom.yaml** (Optional customization):
-```yaml
-toolAliases:
-  "get-museum-hours": "list-museum-hours"
-  "post-special-events": "create-event"
+### 3. Test with MCP Inspector
+```bash
+# Terminal 1: Start MCP server
+openapi-mcp-bridge --definitions .
 
-predefinedParameters:
-  global:
-    page: 1
-    limit: 10
-  endpoints:
-    "post-special-events":
-      category: "educational"
-
-authenticationOverrides:
-  - endpoint: "*"
-    credentials:
-      username: "${MUSEUM_USER}"
-      password: "${MUSEUM_PASS}"
+# Terminal 2: Test with inspector
+npm install -g @modelcontextprotocol/inspector
+mcp-inspector npx openapi-mcp-bridge --definitions .
 ```
 
-### 2. Express Integration
+**Result**: You'll see `getMuseumHours` tool available in the MCP Inspector interface.
+
+## Integration Examples
+
+### Claude Desktop Integration
+
+Add to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS):
+
+```json
+{
+  "mcpServers": {
+    "museum-api": {
+      "command": "npx",
+      "args": ["openapi-mcp-bridge", "--definitions", "/path/to/your/api-definitions"]
+    }
+  }
+}
+```
+
+**Usage**: Ask Claude "What are the museum hours?" and it will automatically call your API.
+
+### Claude Code Integration
+
+1. Create `.claude-code-mcp.json` in your project:
+```json
+{
+  "mcpServers": {
+    "my-api": {
+      "command": "npx",
+      "args": ["openapi-mcp-bridge", "--definitions", "./api-definitions"]
+    }
+  }
+}
+```
+
+2. Claude Code will automatically detect and use your API tools.
+
+### Custom MCP Client
 
 ```typescript
+// TypeScript example with proper ES module setup
+import { spawn } from 'child_process';
+import { MCPClient } from '@modelcontextprotocol/client';
+
+const serverProcess = spawn('npx', ['openapi-mcp-bridge', '--definitions', './api-definitions']);
+const client = new MCPClient();
+
+await client.connect({ 
+  stdio: { 
+    stdin: serverProcess.stdin, 
+    stdout: serverProcess.stdout 
+  } 
+});
+
+// List available tools
+const tools = await client.listTools();
+console.log('Available tools:', tools);
+
+// Call a tool
+const result = await client.callTool('getMuseumHours', { date: '2024-01-15' });
+console.log('Result:', result);
+```
+
+## Usage Patterns
+
+### When to Use Each Approach
+
+| Use Case | Approach | Best For |
+|----------|----------|----------|
+| **AI Model Integration** | CLI (`openapi-mcp-bridge`) | Claude Desktop, Claude Code, custom MCP clients |
+| **Web Application** | Express/Fastify middleware | Adding MCP endpoints to existing web apps |
+| **Microservice** | Standalone server | Dedicated MCP service, Docker deployments |
+| **Development/Testing** | MCP Inspector | Testing and debugging MCP tools |
+
+### Decision Tree
+
+```
+Do you want to integrate with an AI model?
+├── Yes → Use CLI approach
+│   ├── Claude Desktop → Update claude_desktop_config.json
+│   ├── Claude Code → Create .claude-code-mcp.json
+│   └── Custom client → Use stdio connection
+└── No → Use HTTP approach
+    ├── Existing Express app → Use Express middleware
+    ├── New microservice → Use standalone server
+    └── Testing → Use MCP Inspector
+```
+
+## Troubleshooting
+
+### Common Issues
+
+#### 1. Import Path Errors
+```bash
+# ❌ Error: Cannot find module 'openapi-mcp-bridge/express'
+import { createExpressMiddleware } from 'openapi-mcp-bridge/express';
+
+# ✅ Solution: Use the correct package exports
+import { createExpressMiddleware } from 'openapi-mcp-bridge/express';
+```
+
+**Root Cause**: Package uses ES modules. Ensure your `package.json` has `"type": "module"`.
+
+#### 2. "Cannot POST /mcp" Error
+```bash
+# ❌ Wrong: Trying to make HTTP requests to MCP endpoint
+curl -X POST http://localhost:3000/mcp
+
+# ✅ Right: Use MCP Inspector or MCP client
+mcp-inspector http://localhost:3000/mcp
+```
+
+**Root Cause**: MCP is not a REST API. It uses JSON-RPC over stdio/WebSocket.
+
+#### 3. Port Conflicts
+```bash
+# ❌ Error: EADDRINUSE: address already in use :::3000
+npm start
+
+# ✅ Solution: Use a different port
+PORT=3001 npm start
+# or
+npx openapi-mcp-bridge --definitions . --port 3001
+```
+
+#### 4. CLI Warnings
+```bash
+# ❌ Warning: --port is not yet implemented in stdio mode
+openapi-mcp-bridge --definitions . --port 3000
+
+# ✅ Solution: Don't use --port with CLI (stdio mode)
+openapi-mcp-bridge --definitions .
+```
+
+**Root Cause**: CLI runs in stdio mode for MCP clients. Use standalone server for HTTP mode.
+
+#### 5. Module Import Issues
+```typescript
+// ❌ CommonJS in ES module project
+const { createExpressMiddleware } = require('openapi-mcp-bridge/express');
+
+// ✅ ES modules syntax
+import { createExpressMiddleware } from 'openapi-mcp-bridge/express';
+```
+
+**Setup for TypeScript projects**:
+```json
+// package.json
+{
+  "type": "module",
+  "scripts": {
+    "start": "tsx src/server.ts"
+  }
+}
+```
+
+```json
+// tsconfig.json
+{
+  "compilerOptions": {
+    "module": "ES2022",
+    "moduleResolution": "node",
+    "target": "ES2022",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true
+  }
+}
+```
+
+### Debug Mode
+
+Enable detailed logging:
+```bash
+# CLI
+openapi-mcp-bridge --definitions . --debug
+
+# Environment variable
+DEBUG=true openapi-mcp-bridge --definitions .
+
+# Programmatic
+const config = {
+  logging: { consoleFallback: true },
+  debug: true
+};
+```
+
+### Validation Issues
+
+```bash
+# Check if OpenAPI file is valid
+npx @redocly/cli lint your-api.yaml
+
+# Force cache regeneration
+OPENAPI_FORCE_REGEN=true openapi-mcp-bridge --definitions .
+
+# Test tool generation
+mcp-inspector npx openapi-mcp-bridge --definitions .
+```
+
+## Advanced Usage
+
+### Express Integration
+
+```typescript
+// server.ts
 import express from 'express';
 import { createExpressMiddleware } from 'openapi-mcp-bridge/express';
 
 const app = express();
 
+// Add MCP endpoint
 app.use('/mcp', createExpressMiddleware({
   definitionsDirectory: './api-definitions',
   defaultCredentials: {
-    username: process.env.MUSEUM_USER,
-    password: process.env.MUSEUM_PASS
-  },
-  logging: { consoleFallback: true }
+    username: process.env.API_USERNAME,
+    password: process.env.API_PASSWORD
+  }
 }));
 
+// Add health check
+app.get('/health', (req, res) => {
+  res.json({ status: 'healthy' });
+});
+
 app.listen(3000, () => {
-  console.log('MCP server available at http://localhost:3000/mcp');
+  console.log('MCP server: http://localhost:3000/mcp');
 });
 ```
 
-### 3. Standalone Server
+### Standalone Server
 
 ```typescript
 import { MCPServer } from 'openapi-mcp-bridge';
@@ -157,35 +303,34 @@ import { MCPServer } from 'openapi-mcp-bridge';
 const server = new MCPServer({
   definitionsDirectory: './api-definitions',
   port: 3000,
-  mountPath: '/mcp'
+  mountPath: '/mcp',
+  defaultCredentials: {
+    username: process.env.API_USERNAME,
+    password: process.env.API_PASSWORD
+  }
 });
 
 await server.start();
+console.log('MCP server running on http://localhost:3000/mcp');
 ```
 
-### 4. CLI Usage
-
-```bash
-npx openapi-mcp-bridge \
-  --definitions ./api-definitions \
-  --port 3000 \
-  --mount-path /mcp
-```
-
-## 🔧 Configuration
-
-### Core Configuration
+### Configuration
 
 ```typescript
-interface LibraryConfig {
+interface Config {
   definitionsDirectory: string;
   cacheDirectory?: string;
+  defaultCredentials?: {
+    username?: string;
+    password?: string;
+    token?: string;
+    apiKey?: string;
+  };
   logging?: {
     winston?: any;
     pino?: any;
     consoleFallback?: boolean;
   };
-  defaultCredentials?: Record<string, any>;
   mcpOptions?: {
     serverName?: string;
     serverVersion?: string;
@@ -193,307 +338,69 @@ interface LibraryConfig {
 }
 ```
 
-### Logging Configuration
-
-```typescript
-import winston from 'winston';
-import pino from 'pino';
-
-const config = {
-  logging: {
-    winston: winstonInstance,     // Use Winston
-    // OR
-    pino: pinoInstance,          // Use Pino
-    // OR
-    consoleFallback: true        // Use console.log
-  }
-};
-```
-
-## 🎨 Customization
-
-### Tool Aliases
-
-Override default tool names:
-
-```yaml
-# museum-api.custom.yaml
-toolAliases:
-  "get-museum-hours": "list-hours"
-  "post-special-events": "create-event"
-  "get-special-events-by-eventId": "get-event-details"
-```
-
-### Predefined Parameters
-
-Set default values that will be automatically applied:
-
-```yaml
-predefinedParameters:
-  global:
-    page: 1
-    limit: 10
-  endpoints:
-    "post-special-events":
-      category: "museum-event"
-      organizer: "museum-staff"
-    "get-museum-hours":
-      format: "json"
-```
-
-### Authentication Overrides
-
-Configure authentication credentials:
-
-```yaml
-authenticationOverrides:
-  - endpoint: "*"  # Apply to all endpoints
-    credentials:
-      username: "${MUSEUM_USER}"
-      password: "${MUSEUM_PASS}"
-  - endpoint: "post-*"  # Apply to all POST operations
-    credentials:
-      token: "${ADMIN_TOKEN}"
-```
-
-## 🔌 Framework Integration
-
-### Express
-
-```typescript
-import express from 'express';
-import { createExpressMiddleware } from 'openapi-mcp-bridge/express';
-
-const app = express();
-app.use('/api/mcp', createExpressMiddleware(config));
-```
-
-### Koa
-
-```typescript
-import Koa from 'koa';
-import { createKoaMiddleware } from 'openapi-mcp-bridge/koa';
-
-const app = new Koa();
-app.use(createKoaMiddleware(config));
-```
-
-### Fastify
-
-```typescript
-import Fastify from 'fastify';
-import { createFastifyPlugin } from 'openapi-mcp-bridge/fastify';
-
-const fastify = Fastify();
-await fastify.register(createFastifyPlugin(config));
-```
-
-## 🔐 Authentication
-
-### Supported Authentication Types
-
-- **HTTP Basic**: Username/password authentication
-- **HTTP Bearer**: Token-based authentication  
-- **API Key**: Header, query parameter, or cookie-based keys
-
-### Configuration Examples
-
-**Basic Authentication:**
-```yaml
-# In your .custom.yaml
-authenticationOverrides:
-  - endpoint: "*"
-    credentials:
-      username: "api-user"
-      password: "secret-password"
-```
-
-**Bearer Token:**
-```yaml
-authenticationOverrides:
-  - endpoint: "*"
-    credentials:
-      token: "your-bearer-token"
-```
-
-**API Key:**
-```yaml
-authenticationOverrides:
-  - endpoint: "*"
-    credentials:
-      key: "your-api-key"
-```
-
-## 🔄 Tool Naming & Parameter Mapping
-
-### Naming Convention
-
-The library automatically generates tool names based on HTTP method and path:
-
-- `GET /museum-hours` → `get-museum-hours`
-- `POST /special-events` → `post-special-events`
-- `GET /special-events/{eventId}` → `get-special-events-by-eventId`
-- `DELETE /tickets/{ticketId}` → `delete-tickets-by-ticketId`
-
-### Parameter Flattening
-
-All parameters (path, query, body) are flattened into a single MCP tool input schema:
-
-**OpenAPI Definition:**
-```yaml
-/special-events/{eventId}:
-  patch:
-    parameters:
-      - name: eventId
-        in: path
-        required: true
-        schema:
-          type: string
-    requestBody:
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              name:
-                type: string
-              location:
-                type: string
-```
-
-**Generated MCP Tool:**
-```json
-{
-  "name": "patch-special-events-by-eventId",
-  "inputSchema": {
-    "type": "object",
-    "properties": {
-      "eventId": { "type": "string" },
-      "name": { "type": "string" },
-      "location": { "type": "string" }
-    },
-    "required": ["eventId"]
-  }
-}
-```
-
-## 🧪 Testing Your MCP Server
-
-### Using MCP Inspector
-
-```bash
-npm install -g @modelcontextprotocol/inspector
-mcp-inspector http://localhost:3000/mcp
-```
-
-### Using Cursor IDE
-
-1. Open Cursor settings
-2. Add MCP server configuration:
-```json
-{
-  "mcpServers": {
-    "museum-api": {
-      "command": "node",
-      "args": ["path/to/your/mcp-server.js"]
-    }
-  }
-}
-```
-
-### Using Claude Desktop
-
-Update your Claude Desktop configuration:
-```json
-{
-  "mcpServers": {
-    "museum-api": {
-      "command": "npx",
-      "args": ["openapi-mcp-bridge", "--definitions", "./api-definitions", "--port", "3000"]
-    }
-  }
-}
-```
-
-### Example LLM Interaction
-
-After connecting to your MCP server, you can ask the LLM:
-
-> "Create a special event called 'Contemporary Art Exhibition' at the Main Gallery for next Friday, and then buy 2 tickets for Alice and Bob"
-
-The LLM will use the generated tools:
-1. `post-special-events` to create the event
-2. `post-tickets` to purchase tickets
-
 ## 📁 Project Structure
 
 ```
 your-project/
 ├── api-definitions/
-│   ├── museum-api.yaml
-│   ├── museum-api.custom.yaml
-│   ├── museum-api.enriched.json     # Auto-generated
-│   ├── museum-api.hash              # Auto-generated
-│   └── .cache/                      # Auto-generated cache
-│       └── abc123def/
-│           └── metadata.json
+│   ├── museum-api.yaml          # OpenAPI specification
+│   ├── museum-api.custom.yaml   # Optional customization
+│   └── .cache/                  # Auto-generated cache
 ├── src/
-│   └── server.ts
-└── package.json
+│   └── server.ts               # Your server code
+├── package.json                # {"type": "module"}
+└── tsconfig.json               # ES2022 modules
 ```
 
-## 🔍 Debugging & Monitoring
+## 🔐 Authentication
 
-### Debug Mode
+Supports HTTP Basic, Bearer tokens, and API keys:
 
-```typescript
-const config = {
-  logging: {
-    consoleFallback: true
-  },
-  debug: true // Enables detailed request/response logging
-};
+```yaml
+# museum-api.custom.yaml
+authenticationOverrides:
+  - endpoint: "*"
+    credentials:
+      username: "${API_USERNAME}"
+      password: "${API_PASSWORD}"
 ```
 
-### Health Check
+## 🧪 Testing
 
-```typescript
-app.get('/health', (req, res) => {
-  const service = req.mcpService; // Available via middleware
-  const status = service.getStatus();
-  res.json({
-    status: 'healthy',
-    toolCount: status.tools.length,
-    definitionsLoaded: status.definitions.length
-  });
-});
+```bash
+# Test tool generation
+npm install -g @modelcontextprotocol/inspector
+mcp-inspector npx openapi-mcp-bridge --definitions ./api-definitions
+
+# Validate OpenAPI specs
+npx @redocly/cli lint api-definitions/*.yaml
+
+# Test with real API calls
+node -e "
+import { MCPClient } from '@modelcontextprotocol/client';
+// ... client code
+"
 ```
+
+## 📝 Examples
+
+- [Express Integration](examples/express-integration/)
+- [Standalone Server](examples/standalone-server/)
+- [CLI Usage](examples/cli-usage/)
+- [Claude Desktop Setup](examples/claude-desktop/)
+- [Complete Museum API](examples/museum-api/)
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see our [Contributing Guide](https://github.com/ephrin/openapi-mcp-bridge/blob/main/CONTRIBUTING.md) for details.
-
-### Development Setup
-
-```bash
-git clone https://github.com/ephrin/openapi-mcp-bridge.git
-cd openapi-mcp-bridge
-npm install
-npm run build
-npm test
-```
-
-### Running Examples
-
-```bash
-cd examples/museum-api
-npm start
-# Visit http://localhost:3000/mcp
-```
+1. Fork the repository
+2. Create a feature branch
+3. Add tests for new functionality
+4. Ensure all tests pass
+5. Submit a pull request
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](https://github.com/ephrin/openapi-mcp-bridge/blob/main/LICENSE) file for details.
+MIT License - see [LICENSE](LICENSE) file for details.
 
 ## 🙏 Acknowledgments
 
@@ -501,12 +408,6 @@ This project is licensed under the MIT License - see the [LICENSE](https://githu
 - [OpenAPI Initiative](https://www.openapis.org/) for the OpenAPI specification
 - [ReadMe OpenAPI Parser](https://github.com/readmeio/oas) for robust OpenAPI parsing
 
-## 📞 Support
-
-- 📖 [Documentation](https://github.com/ephrin/openapi-mcp-bridge/wiki)
-- 🐛 [Issues](https://github.com/ephrin/openapi-mcp-bridge/issues)
-- 💬 [Discussions](https://github.com/ephrin/openapi-mcp-bridge/discussions)
-
 ---
 
-Made with ❤️ for the LLM and API integration community
+**Need help?** Check our [troubleshooting guide](#troubleshooting) or [open an issue](https://github.com/ephrin/openapi-mcp-bridge/issues).

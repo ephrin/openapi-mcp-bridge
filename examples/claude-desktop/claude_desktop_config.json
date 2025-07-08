@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "museum-api": {
+      "command": "npx",
+      "args": [
+        "openapi-mcp-bridge",
+        "--definitions",
+        "/absolute/path/to/your/api-definitions"
+      ],
+      "env": {
+        "MUSEUM_API_USERNAME": "demo_user",
+        "MUSEUM_API_PASSWORD": "demo_password"
+      }
+    }
+  }
+}

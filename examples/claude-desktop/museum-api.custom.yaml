@@ -1,0 +1,17 @@
+toolAliases:
+  "getMuseumHours": "get-museum-hours"
+  "listSpecialEvents": "list-events"
+  "createSpecialEvent": "create-event"
+
+predefinedParameters:
+  global:
+    limit: 10
+  endpoints:
+    "listSpecialEvents":
+      category: "museum-event"
+
+authenticationOverrides:
+  - endpoint: "*"
+    credentials:
+      username: "demo_user"
+      password: "demo_password"

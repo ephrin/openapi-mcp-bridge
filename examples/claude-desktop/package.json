@@ -1,0 +1,16 @@
+{
+  "name": "claude-desktop-example",
+  "version": "1.0.0",
+  "description": "Claude Desktop integration example for openapi-mcp-bridge",
+  "scripts": {
+    "test": "mcp-inspector npx openapi-mcp-bridge --definitions .",
+    "validate": "npx @redocly/cli lint museum-api.yaml"
+  },
+  "dependencies": {
+    "openapi-mcp-bridge": "^0.1.4"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/inspector": "^0.1.0",
+    "@redocly/cli": "^1.0.0"
+  }
+}

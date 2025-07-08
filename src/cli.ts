@@ -17,12 +17,13 @@ Usage: openapi-mcp-bridge [options]
 
 Options:
   --definitions <dir>   Directory containing OpenAPI definitions (default: ./definitions)
-  --port <number>       Port to run server on (for HTTP mode)
-  --mount-path <path>   Path to mount MCP endpoints (for HTTP mode)
   --cache-dir <dir>     Directory for caching (default: ./definitions/.cache)
   --no-cache            Disable caching
   --debug               Enable debug logging
   --help                Show this help message
+
+Note: This CLI runs MCP server in stdio mode for integration with MCP clients.
+For HTTP server mode, use the standalone server or framework integrations.
 
 Environment Variables:
   OPENAPI_DEFINITIONS_DIR   Override definitions directory
@@ -73,10 +74,9 @@ for (let i = 0; i < args.length; i++) {
       break;
     case '--port':
     case '--mount-path':
-      // These are for HTTP mode, which we'll implement later
-      console.error(`Warning: ${args[i]} is not yet implemented in stdio mode`);
-      i++;
-      break;
+      // These are for HTTP mode - not applicable in stdio mode
+      console.error(`Error: ${args[i]} is not supported in stdio mode. Use standalone server or framework integrations for HTTP mode.`);
+      process.exit(1);
   }
 }
 

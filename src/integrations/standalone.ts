@@ -58,8 +58,18 @@ export class MCPServer {
     return new Promise((resolve, reject) => {
       this.server = this.app.listen(this.port, () => {
         console.log(`MCP Server listening on port ${this.port}`);
+        console.log(`MCP endpoint: http://localhost:${this.port}${this.mountPath}`);
+        console.log(`Health check: http://localhost:${this.port}/health`);
         resolve();
-      }).on('error', reject);
+      }).on('error', (error: any) => {
+        if (error.code === 'EADDRINUSE') {
+          const newError = new Error(`Port ${this.port} is already in use. Please choose a different port or stop the service using this port.`);
+          newError.cause = error;
+          reject(newError);
+        } else {
+          reject(error);
+        }
+      });
     });
   }
   
