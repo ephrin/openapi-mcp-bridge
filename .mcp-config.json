@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "museum-api": {
+      "command": "node",
+      "args": ["server/main.ts"],
+      "env": {
+        "PORT": "3003",
+        "MUSEUM_API_USERNAME": "demo_user",
+        "MUSEUM_API_PASSWORD": "demo_password"
+      }
+    }
+  }
+}
