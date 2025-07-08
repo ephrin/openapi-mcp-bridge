@@ -46,7 +46,7 @@ info:
   title: Museum API
   version: 1.1.1
 servers:
-  - url: https://api.fake-museum-example.com/v1.1
+  - url: https://redocly.com/_mock/demo/openapi/museum-api
 paths:
   /museum-hours:
     get:

@@ -9,6 +9,6 @@
     "start:no-cache": "npx openapi-mcp-bridge --definitions ./api-definitions --port 3000 --no-cache"
   },
   "dependencies": {
-    "openapi-mcp-bridge": "^0.1.0"
+    "openapi-mcp-bridge": "^0.1.3"
   }
 }

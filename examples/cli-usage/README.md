@@ -96,7 +96,7 @@ Add to your Claude Desktop configuration:
     "museum-api": {
       "command": "npx",
       "args": [
-        "openapi-mcp-server", 
+        "openapi-mcp-bridge", 
         "--definitions", 
         "./path/to/api-definitions", 
         "--port", 

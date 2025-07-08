@@ -214,7 +214,7 @@ Uses content-based hashing to detect changes in OpenAPI definitions and customiz
   "mcpServers": {
     "museum-api": {
       "command": "npx",
-      "args": ["openapi-mcp-server", "--definitions", "./api-definitions"]
+      "args": ["openapi-mcp-bridge", "--definitions", "./api-definitions"]
     }
   }
 }

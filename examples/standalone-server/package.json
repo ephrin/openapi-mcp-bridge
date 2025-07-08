@@ -8,7 +8,7 @@
     "dev": "nodemon server.js"
   },
   "dependencies": {
-    "openapi-mcp-bridge": "^0.1.0"
+    "openapi-mcp-bridge": "^0.1.3"
   },
   "devDependencies": {
     "nodemon": "^3.0.2"
