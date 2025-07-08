@@ -14,9 +14,12 @@ function createCjsWrapper(modulePath) {
   const moduleDir = dirname(modulePath);
   const cjsPath = modulePath.replace('.js', '.cjs');
   
+  // Calculate relative path from CJS file to JS file (same directory)
+  const jsFileName = relative(moduleDir, modulePath).replace(/\\/g, '/');
+  
   const wrapper = `// CommonJS wrapper for ${relativePath}
 module.exports = (async () => {
-  const module = await import('./${relativePath}');
+  const module = await import('./${jsFileName}');
   return module;
 })();
 `;

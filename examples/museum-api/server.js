@@ -1,6 +1,12 @@
 #!/usr/bin/env node
 
-const { MCPProxyService } = require('../../dist/services/mcp-proxy-service.js');
+// Import the package (async since it's ESM)
+let MCPProxyService;
+
+async function loadPackage() {
+  const pkg = await require('openapi-mcp-bridge');
+  MCPProxyService = pkg.MCPProxyService;
+}
 
 // Configure the service exactly like the main implementation
 const config = {
@@ -33,6 +39,9 @@ Object.keys(config.defaultCredentials).forEach(key => {
 async function main() {
   console.log('🏛️  Museum API MCP Server Example');
   console.log('=====================================');
+  
+  // Load the package first
+  await loadPackage();
   
   // Initialize the proxy service directly
   const proxyService = new MCPProxyService(config);
