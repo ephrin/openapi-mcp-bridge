@@ -1,0 +1,18 @@
+{
+  "name": "claude-code-example",
+  "version": "1.0.0",
+  "description": "Claude Code integration example for openapi-mcp-bridge",
+  "scripts": {
+    "test": "mcp-inspector npx openapi-mcp-bridge --definitions ./api-definitions",
+    "test-debug": "mcp-inspector npx openapi-mcp-bridge --definitions ./api-definitions --debug",
+    "validate": "npx @redocly/cli lint api-definitions/museum-api.yaml",
+    "claude-setup": "echo 'Run: claude mcp add museum-api npx openapi-mcp-bridge --definitions ./api-definitions'"
+  },
+  "dependencies": {
+    "openapi-mcp-bridge": "^0.1.4"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/inspector": "^0.1.0",
+    "@redocly/cli": "^1.0.0"
+  }
+}

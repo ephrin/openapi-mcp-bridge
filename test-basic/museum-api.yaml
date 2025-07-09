@@ -1,0 +1,22 @@
+openapi: 3.1.0
+info:
+  title: Museum API
+  version: 1.0.0
+servers:
+  - url: https://redocly.com/_mock/demo/openapi/museum-api
+paths:
+  /museum-hours:
+    get:
+      summary: Get museum hours
+      operationId: getMuseumHours
+      parameters:
+        - name: date
+          in: query
+          schema:
+            type: string
+            format: date
+components:
+  securitySchemes:
+    BasicAuth:
+      type: http
+      scheme: basic

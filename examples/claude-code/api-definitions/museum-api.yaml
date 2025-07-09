@@ -1,0 +1,178 @@
+openapi: 3.1.0
+info:
+  title: Museum API
+  version: 1.0.0
+  description: Example museum API for Claude Code integration
+servers:
+  - url: https://redocly.com/_mock/demo/openapi/museum-api
+paths:
+  /museum-hours:
+    get:
+      summary: Get museum hours
+      description: |
+        Retrieve operating hours for the museum on a specific date.
+        Returns opening/closing times and whether the museum is open.
+      operationId: getMuseumHours
+      parameters:
+        - name: date
+          in: query
+          schema:
+            type: string
+            format: date
+          description: Specific date to get hours for (ISO format YYYY-MM-DD)
+          example: "2024-12-15"
+      responses:
+        '200':
+          description: Museum hours for the specified date
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  date:
+                    type: string
+                    format: date
+                    example: "2024-12-15"
+                  hours:
+                    type: string
+                    example: "9:00 AM - 5:00 PM"
+                  isOpen:
+                    type: boolean
+                    example: true
+  /special-events:
+    get:
+      summary: List special events
+      description: |
+        Get a list of special events happening at the museum.
+        Can filter by date range to find events in specific time periods.
+      operationId: listSpecialEvents
+      parameters:
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+          description: Start date for event search (ISO format)
+          example: "2024-12-01"
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+          description: End date for event search (ISO format)
+          example: "2024-12-31"
+      responses:
+        '200':
+          description: List of special events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      example: "evt-123"
+                    name:
+                      type: string
+                      example: "Contemporary Art Exhibition"
+                    location:
+                      type: string
+                      example: "West Wing Gallery"
+                    date:
+                      type: string
+                      format: date
+                      example: "2024-12-15"
+                    price:
+                      type: number
+                      example: 25.00
+                    description:
+                      type: string
+                      example: "Featuring modern sculptures and installations"
+    post:
+      summary: Create special event
+      description: |
+        Create a new special event at the museum.
+        All required fields must be provided for successful creation.
+      operationId: createSpecialEvent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Event name
+                  example: "Contemporary Art Exhibition"
+                location:
+                  type: string
+                  description: Event location within the museum
+                  example: "West Wing Gallery"
+                date:
+                  type: string
+                  format: date
+                  description: Event date (ISO format YYYY-MM-DD)
+                  example: "2024-12-15"
+                price:
+                  type: number
+                  description: Ticket price in dollars
+                  example: 25.00
+                description:
+                  type: string
+                  description: Event description
+                  example: "Featuring modern sculptures and installations"
+              required: [name, location, date, price]
+      responses:
+        '201':
+          description: Event created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    example: "evt-124"
+                  message:
+                    type: string
+                    example: "Event created successfully"
+                  event:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                        example: "Contemporary Art Exhibition"
+                      location:
+                        type: string
+                        example: "West Wing Gallery"
+                      date:
+                        type: string
+                        format: date
+                        example: "2024-12-15"
+                      price:
+                        type: number
+                        example: 25.00
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Invalid date format"
+                  details:
+                    type: string
+                    example: "Date must be in YYYY-MM-DD format"
+security:
+  - BasicAuth: []
+components:
+  securitySchemes:
+    BasicAuth:
+      type: http
+      scheme: basic
+      description: Basic authentication with username and password
